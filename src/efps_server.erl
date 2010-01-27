@@ -4,7 +4,7 @@
 -author('Glenn Rempe <glenn@rempe.us>').
 -behaviour(gen_listener_tcp).
 
--define(TCP_PORT, 9234).
+-define(TCP_PORT, 843).
 -define(TCP_OPTS, [binary, inet,
                    {active,    false},
                    {backlog,   10},
@@ -28,19 +28,20 @@
 start() ->
     gen_listener_tcp:start({local, ?MODULE}, ?MODULE, [], []).
 
-%% @doc The echo client process.
-echo_client(Socket) ->
+%% @doc The flash policy file client.
+fps_client(Socket) ->
     error_logger:info_msg("client()~n"),
     ok = inet:setopts(Socket, [{active, once}]),
     receive
-        {tcp, Socket, <<"quit", _R/binary>>} ->
-            error_logger:info_msg("Quit Requested."),
-            gen_tcp:send(Socket, "Bye now.\r\n"),
+        {tcp, Socket, <<"<policy-file-request/>", _R/binary>>} ->
+            error_logger:info_msg("Policy File Requested."),
+            Reply = "<cross-domain-policy><allow-access-from domain=\"*\" to-ports=\"*\" /></cross-domain-policy>\0",
+            gen_tcp:send(Socket, Reply ++ "\r\n"),
             gen_tcp:close(Socket);
         {tcp, Socket, Data} ->
-            error_logger:info_msg("Got Data: ~p", [Data]),
-            gen_tcp:send(Socket, "I Received " ++ Data),
-            echo_client(Socket);
+            error_logger:info_msg("Unexpected Request : ~p", [Data]),
+            gen_tcp:send(Socket, "<error/>\r\n"),
+            gen_tcp:close(Socket);
         {tcp_closed, Socket} ->
             error_logger:info_msg("Client Disconnected.")
     end.
@@ -49,7 +50,7 @@ init([]) ->
     {ok, {?TCP_PORT, ?TCP_OPTS}, nil}.
 
 handle_accept(Sock, State) ->
-    Pid = spawn(fun() -> echo_client(Sock) end),
+    Pid = spawn(fun() -> fps_client(Sock) end),
     gen_tcp:controlling_process(Sock, Pid),
     {noreply, State}.
 
