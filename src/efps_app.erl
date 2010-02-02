@@ -1,5 +1,5 @@
 -module(efps_app).
-
+-author('Glenn Rempe <glenn@rempe.us>').
 -behaviour(application).
 
 %% Application callbacks
@@ -14,3 +14,5 @@ start(_StartType, _StartArgs) ->
 
 stop(_State) ->
     ok.
+
+

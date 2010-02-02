@@ -1,8 +1,8 @@
-%% Implements a Flash Socket Policy File server using the gen_listener_tcp behaviour.
-
 -module(efps_server).
 -author('Glenn Rempe <glenn@rempe.us>').
 -behaviour(gen_listener_tcp).
+
+%% Implements a Flash Socket Policy File server using the gen_listener_tcp behaviour.
 
 -define(TCP_PORT, 843).
 -define(TCP_OPTS, [binary, inet,
@@ -13,7 +13,7 @@
                    {reuseaddr, true}]).
 
 %% API
--export([start/0]).
+-export([start_link/0]).
 
 %% gen_listener_tcp callbacks
 -export([init/1,
@@ -25,8 +25,8 @@
          code_change/3]).
 
 %% @doc Start the server.
-start() ->
-    gen_listener_tcp:start({local, ?MODULE}, ?MODULE, [], []).
+start_link() ->
+    gen_listener_tcp:start_link({local, ?MODULE}, ?MODULE, [], []).
 
 %% @doc The flash policy file client.
 fps_client(Socket) ->
@@ -68,3 +68,5 @@ terminate(_Reason, _State) ->
 
 code_change(_OldVsn, State, _Extra) ->
     {ok, State}.
+
+

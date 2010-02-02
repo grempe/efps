@@ -1,6 +1,5 @@
-
 -module(efps_sup).
-
+-author('Glenn Rempe <glenn@rempe.us>').
 -behaviour(supervisor).
 
 %% API
@@ -24,7 +23,6 @@ start_link() ->
 %% ===================================================================
 
 init([]) ->
-    {ok, { {one_for_one, 5, 10}, [
-        {efps_server, {efps_server, start, []}, permanent, 10000, worker, [rebar]}
-    ]} }.
+    EfpsChild = {efps_server, {efps_server, start_link, []}, permanent, 10000, worker, [efps_server]},
+    {ok,{{one_for_one, 5, 10},[EfpsChild]}}.
 
