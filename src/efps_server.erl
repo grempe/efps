@@ -30,11 +30,11 @@ start_link() ->
 
 %% @doc The flash policy file client.
 fps_client(Socket) ->
-    error_logger:info_msg("client()~n"),
+    %error_logger:info_msg("client()~n"),
     ok = inet:setopts(Socket, [{active, once}]),
     receive
         {tcp, Socket, <<"<policy-file-request/>", _R/binary>>} ->
-            error_logger:info_msg("Policy File Requested."),
+            %error_logger:info_msg("Policy File Requested."),
             Reply = "<cross-domain-policy><allow-access-from domain=\"*\" to-ports=\"*\" /></cross-domain-policy>\0",
             gen_tcp:send(Socket, Reply ++ "\r\n"),
             gen_tcp:close(Socket);

@@ -6,8 +6,15 @@ passed in to the connection.
 
 This is a raw socket server, and not an HTTP server.
 
+Run & Install w/ Rakefile
+-----------------
 
-Dev Installation:
+rake -T
+rake compile
+rake start
+
+
+Manual Dev Installation:
 -----------------
 
 cd efps
@@ -18,12 +25,13 @@ sudo erl -pa ./ebin
 application:start(efps).
 
 
-Full Installation:
+Manual Full Installation:
 -----------------
 
 cd efps
 ./rebar compile
 [sudo] ./rebar install
+[sudo] ./rebar install --force     ## as needed
 
 # Must start erl with sudo as it runs on the priv *nix port 843
 sudo erl
@@ -42,6 +50,9 @@ Should return:
 
 Credits:
 --------
+
+# settup up a boot file
+http://spawnlink.com/articles/an-introduction-to-releases-with-erlybank/
 
 http://github.com/kaos/gen_listener_tcp
 http://20bits.com/articles/erlang-a-generalized-tcp-server/
