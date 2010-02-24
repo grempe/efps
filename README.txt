@@ -57,15 +57,34 @@ Should return:
 
 <cross-domain-policy><allow-access-from domain="*" to-ports="*" /></cross-domain-policy>
 
+There is also a Rakefile task 'rake ping' which will perform the same test.
+
+
+Performance Testing
+---------
+
+There is a crude performance testing tool called 'slam'. When run it will simply open
+a large number of simultaneous connections to the efps server.
+
+To run, start the server in one terminal with 'rake start' and in another
+terminal run 'rake shell'.  Once in that shell run 'slam:start/1' passing in the number
+of connections to make:
+
+(efpshell@macbook-pro)19> slam:start(1000).
+ok
+
+This will return 'ok' as well as any errors encountered.
+
 
 Credits:
 --------
-
-# settup up a boot file
-http://spawnlink.com/articles/an-introduction-to-releases-with-erlybank/
 
 http://github.com/kaos/gen_listener_tcp
 http://20bits.com/articles/erlang-a-generalized-tcp-server/
 http://dizzyd.com/blog/post/194
 http://www.simoncobb.co.uk/2008/10/flash-socket-policy-file-in-erlang.html
+
+# settup up a boot file
+http://spawnlink.com/articles/an-introduction-to-releases-with-erlybank/
+
 

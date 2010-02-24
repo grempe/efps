@@ -6,8 +6,8 @@
 
 -define(TCP_PORT, 843).
 -define(TCP_OPTS, [binary, inet,
-                   {active,    false},
-                   {backlog,   10},
+                   {active,    once},
+                   {backlog,   100},
                    {nodelay,   true},
                    {packet,    raw},
                    {reuseaddr, true}]).
