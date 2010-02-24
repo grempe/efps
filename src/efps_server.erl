@@ -29,13 +29,19 @@ start_link() ->
     gen_listener_tcp:start_link({local, ?MODULE}, ?MODULE, [], []).
 
 %% @doc The flash policy file client.
-fps_client(Socket) ->
+fps_client(Socket, State) ->
     %error_logger:info_msg("client()~n"),
+    %error_logger:info_msg("State : domain ~p : ports ~p ~n", [proplists:get_value(domain,State,"*"), proplists:get_value(ports,State,"*")]),
     ok = inet:setopts(Socket, [{active, once}]),
     receive
         {tcp, Socket, <<"<policy-file-request/>", _R/binary>>} ->
             %error_logger:info_msg("Policy File Requested."),
-            Reply = "<cross-domain-policy><allow-access-from domain=\"*\" to-ports=\"*\" /></cross-domain-policy>\0",
+            
+            Reply   = "<?xml version=\"1.0\"?>"
+                    ++ "<!DOCTYPE cross-domain-policy SYSTEM \"/xml/dtds/cross-domain-policy.dtd\">"
+                    ++ "<cross-domain-policy>"
+                    ++ "<allow-access-from domain=\"" ++ [proplists:get_value(domain,State,"*")] ++ "\" to-ports=\"" ++ [proplists:get_value(ports,State,"*")] ++ "\" />"
+                    ++ "</cross-domain-policy>\0",
             gen_tcp:send(Socket, Reply ++ "\r\n"),
             gen_tcp:close(Socket);
         {tcp, Socket, Data} ->
@@ -47,10 +53,11 @@ fps_client(Socket) ->
     end.
 
 init([]) ->
-    {ok, {?TCP_PORT, ?TCP_OPTS}, nil}.
+    {ok, Conf} = file:consult("application.cfg"),
+    {ok, {?TCP_PORT, ?TCP_OPTS}, Conf}.
 
 handle_accept(Sock, State) ->
-    Pid = spawn(fun() -> fps_client(Sock) end),
+    Pid = spawn(fun() -> fps_client(Sock, State) end),
     gen_tcp:controlling_process(Sock, Pid),
     {noreply, State}.
 
@@ -68,5 +75,4 @@ terminate(_Reason, _State) ->
 
 code_change(_OldVsn, State, _Extra) ->
     {ok, State}.
-
 

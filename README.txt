@@ -1,15 +1,25 @@
-Erlang OTP Flash Policy File Server
+Erlang/OTP Flash Policy Server (EFPS)
 
 A simple server that listens for connections on port 843 and
 serves up a flash policy file when the request '<policy-file-request/>' is
 passed in to the connection.
 
-This is a raw socket server, and not an HTTP server.
+Note : This is a TCP socket server, and *not* an HTTP server. This server must listen on port 843
+which is a privileged port on *nix systems.  This server must be started with root privs (sudo)
+on such systems or you will see errors on startup.
+
+
+Configuration
+-----------------
+Modify the application.cfg file to set the 'allow-access-from domain'
+and 'to-ports' config variables that render in the Socket policy XML file.
+
+If unset, by default both are set to the wildcard "*"
 
 Run & Install w/ Rakefile
 -----------------
 
-rake -T
+rake -T  # Shows all available rake commands
 rake compile
 rake start
 
