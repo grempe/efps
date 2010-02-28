@@ -9,7 +9,7 @@ task :compile do
   sh("#{PWD}/rebar compile")
 end
 
-desc "Start server."
+desc "Start erl shell."
 task :shell => [:compile] do
   sh("erl +K true +P 256000 -sname efpshell -pa #{PWD}/ebin")
 end

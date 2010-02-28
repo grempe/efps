@@ -23,6 +23,5 @@ start_link() ->
 %% ===================================================================
 
 init([]) ->
-    EfpsChild = {efps_server, {efps_server, start_link, []}, permanent, 10000, worker, [efps_server]},
-    {ok,{{one_for_one, 5, 10},[EfpsChild]}}.
+    {ok,{{one_for_one, 5, 10},[?CHILD(efps_server, worker)]}}.
 
