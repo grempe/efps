@@ -11,7 +11,7 @@ end
 
 desc "Start erl shell."
 task :shell => [:compile] do
-  sh("erl +K true +P 256000 -sname efpshell -pa #{PWD}/ebin")
+  sh("sudo erl +K true +P 256000 -sname efpshell -pa #{PWD}/ebin")
 end
 
 desc "Start server."
