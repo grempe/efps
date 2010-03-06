@@ -36,13 +36,16 @@ fps_client(Socket, State) ->
     receive
         {tcp, Socket, <<"<policy-file-request/>", _R/binary>>} ->
             %error_logger:info_msg("Policy File Requested."),
-            
+
             Reply   = "<?xml version=\"1.0\"?>"
                     ++ "<!DOCTYPE cross-domain-policy SYSTEM \"/xml/dtds/cross-domain-policy.dtd\">"
                     ++ "<cross-domain-policy>"
                     ++ "<allow-access-from domain=\"" ++ [proplists:get_value(domain,State,"*")] ++ "\" to-ports=\"" ++ [proplists:get_value(ports,State,"*")] ++ "\" />"
                     ++ "</cross-domain-policy>\0",
-            gen_tcp:send(Socket, Reply ++ "\r\n"),
+
+            %error_logger:info_msg("Sending Reply : ~p~n", [list_to_binary(Reply)]),
+
+            gen_tcp:send(Socket, list_to_binary(Reply ++ "\r\n")),
             gen_tcp:close(Socket);
         {tcp, Socket, Data} ->
             error_logger:info_msg("Unexpected Request : ~p", [Data]),
