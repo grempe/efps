@@ -15,5 +15,6 @@
                   stdlib
                  ]},
   {mod, { efps_app, []}},
-  {env, []}
+  {env, [{domain, "*"},
+         {ports, "*"}]}
  ]}.

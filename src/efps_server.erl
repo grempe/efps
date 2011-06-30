@@ -56,7 +56,7 @@ fps_client(Socket, State) ->
     end.
 
 init([]) ->
-    {ok, Conf} = file:consult("application.cfg"),
+    Conf = application:get_all_env(),
     {ok, {?TCP_PORT, ?TCP_OPTS}, Conf}.
 
 handle_accept(Sock, State) ->
