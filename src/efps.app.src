@@ -15,6 +15,8 @@
                   stdlib
                  ]},
   {mod, { efps_app, []}},
-  {env, [{domain, "*"},
-         {ports, "*"}]}
+  {env, [{allow_access_from,
+          [{domain, "*"},
+           {to_ports, "*"},
+           secure]}]}
  ]}.
