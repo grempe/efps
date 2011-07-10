@@ -30,22 +30,20 @@ start_link() ->
 
 %% @doc The flash policy file client.
 fps_client(Socket, State) ->
-    %error_logger:info_msg("client()~n"),
-    %error_logger:info_msg("State : domain ~p : ports ~p ~n", [proplists:get_value(domain,State,"*"), proplists:get_value(ports,State,"*")]),
     ok = inet:setopts(Socket, [{active, once}]),
     receive
         {tcp, Socket, <<"<policy-file-request/>", _R/binary>>} ->
             %error_logger:info_msg("Policy File Requested."),
 
-            Reply   = "<?xml version=\"1.0\"?>"
-                    ++ "<!DOCTYPE cross-domain-policy SYSTEM \"/xml/dtds/cross-domain-policy.dtd\">"
-                    ++ "<cross-domain-policy>"
-                    ++ "<allow-access-from domain=\"" ++ [proplists:get_value(domain,State,"*")] ++ "\" to-ports=\"" ++ [proplists:get_value(ports,State,"*")] ++ "\" />"
-                    ++ "</cross-domain-policy>\0",
+          Reply   = ["<?xml version=\"1.0\"?>\n",
+                     "<!DOCTYPE cross-domain-policy SYSTEM \"/xml/dtds/cross-domain-policy.dtd\">\n",
+                     "<cross-domain-policy>\n",
+                     lists:map(fun write_element/1, State),
+                     "</cross-domain-policy>\0"],
 
             %error_logger:info_msg("Sending Reply : ~p~n", [list_to_binary(Reply)]),
 
-            gen_tcp:send(Socket, list_to_binary(Reply ++ "\r\n")),
+            gen_tcp:send(Socket, iolist_to_binary(Reply ++ "\r\n")),
             gen_tcp:close(Socket);
         {tcp, Socket, Data} ->
             error_logger:info_msg("Unexpected Request : ~p", [Data]),
@@ -55,8 +53,41 @@ fps_client(Socket, State) ->
             error_logger:info_msg("Client Disconnected.")
     end.
 
+write_element({site_control, Attributes}) ->
+  io_lib:format(
+    "<site-control permitted-cross-domain-policies=\"~s\" />~n",
+    [proplists:get_value(permitted_cross_domain_policies, Attributes, "none")]);
+write_element({allow_access_from, Attributes}) ->
+  io_lib:format(
+    "<allow-access-from domain=\"~s\" to-ports=\"~s\" secure=\"~p\"/>~n",
+    [proplists:get_value(domain, Attributes, "*"),
+     proplists:get_value(to_ports, Attributes, "*"),
+     proplists:get_bool(secure, Attributes)]);
+write_element({allow_access_from_identity, {signatory, {certificate, Attributes}}}) ->
+  io_lib:format(
+    "<allow-access-from-identity>~n"
+      "\t<signatory>~n"
+        "\t\t<certificate fingerprint-algorithm=\"~s\" fingerprint=\"~s\" />~n"
+          "\t</signatory>~n"
+            "</allow-access-from-identity>~n",
+    [proplists:get_value(fingerprint_algorithm, Attributes, "sha-1"),
+     proplists:get_value(fingerprint, Attributes, "")]);
+write_element({allow_http_request_headers_from, Attributes}) ->
+  io_lib:format(
+    "<allow-http-request-headers-from domain=\"~s\" headers=\"~s\" secure=\"~p\"/>~n",
+    [proplists:get_value(domain, Attributes, "*"),
+     proplists:get_value(headers, Attributes, "*"),
+     proplists:get_bool(secure, Attributes)]);
+write_element({included_applications, _}) -> [];
+write_element(Element = {Name, _}) ->
+  error_logger:warning_msg("Unsupported element in efps configuration: ~p", [Element]),
+  io_lib:format("<!-- Unsupported element: ~p-->", [Name]);
+write_element(Element) ->
+  error_logger:warning_msg("Unsupported element in efps configuration: ~p", [Element]),
+  [].
+
 init([]) ->
-    {ok, Conf} = file:consult("application.cfg"),
+    Conf = application:get_all_env(),
     {ok, {?TCP_PORT, ?TCP_OPTS}, Conf}.
 
 handle_accept(Sock, State) ->

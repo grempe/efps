@@ -6,9 +6,8 @@ start() ->
 start(Num) ->
     tests(843, Num).
 
-tests(Port, 0) -> ok;
+tests(_Port, 0) -> ok;
 tests(Port, Num) ->
-    TestCount = 0,
     spawn(fun() -> client(Port) end),
     %error_logger:info_msg("Spawned Client # ~B ~n", [Num]),
     tests(Port, Num - 1).
