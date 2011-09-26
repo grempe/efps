@@ -43,11 +43,11 @@ fps_client(Socket, State) ->
 
             %error_logger:info_msg("Sending Reply : ~p~n", [list_to_binary(Reply)]),
 
-            gen_tcp:send(Socket, iolist_to_binary(Reply ++ "\r\n")),
+            _ = gen_tcp:send(Socket, iolist_to_binary(Reply ++ "\r\n")),
             gen_tcp:close(Socket);
         {tcp, Socket, Data} ->
             error_logger:info_msg("Unexpected Request : ~p", [Data]),
-            gen_tcp:send(Socket, "<error/>\r\n"),
+            _ = gen_tcp:send(Socket, "<error/>\r\n"),
             gen_tcp:close(Socket);
         {tcp_closed, Socket} ->
             error_logger:info_msg("Client Disconnected.")
@@ -92,7 +92,7 @@ init([]) ->
 
 handle_accept(Sock, State) ->
     Pid = spawn(fun() -> fps_client(Sock, State) end),
-    gen_tcp:controlling_process(Sock, Pid),
+    ok = gen_tcp:controlling_process(Sock, Pid),
     {noreply, State}.
 
 handle_call(Request, _From, State) ->
