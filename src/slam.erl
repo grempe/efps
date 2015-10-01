@@ -13,21 +13,22 @@ tests(Port, Num) ->
     tests(Port, Num - 1).
 
 client(Port) ->
-    case gen_tcp:connect("127.0.0.1", Port, []) of
+  case gen_tcp:connect("127.0.0.1", Port, []) of
     {ok, Socket} ->
+      _ =
         case gen_tcp:send(Socket, "<policy-file-request/>") of
-        ok ->
+          ok ->
             %error_logger:info_msg("Request sent~n"),
             wait_reply(Socket);
-        {error, closed} ->
+          {error, closed} ->
             error_logger:info_msg("Request failed with {error, closed}~n");
-        _ ->
+          _ ->
             error_logger:info_msg("Request failed with unknown error~n")
         end,
-        ok = gen_tcp:close(Socket);
+      ok = gen_tcp:close(Socket);
     _ ->
-        error
-    end.
+      error
+  end.
 
 wait_reply(_X) ->
     receive
